@@ -89,9 +89,10 @@ export const submitReport = async (data) => {
 
 export const fetchWeather = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/weather/`, {
+    const response = await fetch(`${API_BASE_URL}/weather/?t=${Date.now()}`, {
       method: 'GET',
       headers: getHeaders(),
+      cache: 'no-store'
     });
     return await response.json();
   } catch (error) {
