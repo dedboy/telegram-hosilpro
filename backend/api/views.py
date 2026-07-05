@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 import json
 import urllib.request
-import google.generativeai as genai
+from google import genai
 from django.conf import settings
 from .models import DigitalPlot, UserTask, AgroReport, ActiveCrop
 from .serializers import DigitalPlotSerializer, UserTaskSerializer, AgroReportSerializer, ActiveCropSerializer
@@ -135,12 +135,14 @@ class AIAnalyzeView(APIView):
             return Response({"error": "No description provided"}, status=status.HTTP_400_BAD_REQUEST)
             
         try:
-            genai.configure(api_key=settings.GEMINI_API_KEY)
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            client = genai.Client(api_key=settings.GEMINI_API_KEY)
             
             prompt = f"Sen tajribali agronom va qishloq xo'jaligi mutaxassisisan. Dehqon murojaat qilyapti. Ekin turi: {crop_type}. Muammo: {issue_description}. Qisqa, lo'nda, o'zbek tilida 2-3 gap bilan aniq yechim va maslahat ber."
             
-            response = model.generate_content(prompt)
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=prompt,
+            )
             return Response({"analysis": response.text})
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
