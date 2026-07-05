@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { User, Phone, TrendingUp, ShieldCheck, Award, Star, Edit2, X } from 'lucide-react';
+import { User, Phone, TrendingUp, ShieldCheck, Award, Star, Edit2, X, Clock } from 'lucide-react';
 import { fetchProfile, updateProfile } from '../../services/api';
 
 const ProfileTab = () => {
@@ -42,6 +42,7 @@ const ProfileTab = () => {
     phone: profileData?.phone_number || 'Kiritilmagan',
     xp: profileData?.xp || 0,
     level: profileData?.level || 'Boshlovchi',
+    isVerified: profileData?.is_verified || false,
   };
 
   return (
@@ -75,10 +76,16 @@ const ProfileTab = () => {
         </div>
         <div className="h-px bg-gray-200 dark:bg-gray-700/50 mx-2"></div>
         <div className="flex items-center p-2">
-          <ShieldCheck className="text-emerald-500 mr-4" size={20} />
+          {userInfo.isVerified ? (
+            <ShieldCheck className="text-emerald-500 mr-4" size={20} />
+          ) : (
+            <Clock className="text-orange-500 mr-4" size={20} />
+          )}
           <div>
             <p className="text-xs text-tg-hint">Holat</p>
-            <p className="font-medium">Tasdiqlangan Fermer</p>
+            <p className="font-medium">
+              {userInfo.isVerified ? 'Tasdiqlangan Fermer' : 'Tasdiqlanmagan (Kutish)'}
+            </p>
           </div>
         </div>
       </div>

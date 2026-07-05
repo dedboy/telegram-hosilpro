@@ -195,7 +195,8 @@ class ProfileView(APIView):
             "telegram_id": user.telegram_id,
             "phone_number": user.phone_number,
             "xp": user.xp,
-            "level": user.level
+            "level": user.level,
+            "is_verified": user.is_verified
         })
 
     def post(self, request):

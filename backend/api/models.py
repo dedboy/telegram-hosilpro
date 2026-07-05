@@ -6,6 +6,7 @@ class CustomUser(AbstractUser):
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     xp = models.IntegerField(default=0)
     level = models.CharField(max_length=50, default='Boshlovchi')
+    is_verified = models.BooleanField(default=False)
 
     def __str__(self):
         return self.username or str(self.telegram_id)
