@@ -16,14 +16,6 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false, // Turn off sourcemaps in production to save space
-    chunkSizeWarningLimit: 1000,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'], // Chunk splitting
-          lucide: ['lucide-react']
-        }
-      }
-    }
+    chunkSizeWarningLimit: 1000
   }
 })
