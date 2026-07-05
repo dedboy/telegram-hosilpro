@@ -105,10 +105,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 AUTH_USER_MODEL = 'api.CustomUser'
 
 # CORS Config
-CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-])
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Telegram Authentication
 TELEGRAM_BOT_TOKEN = env('TELEGRAM_BOT_TOKEN', default='8761808924:AAGrTornZrY2dRAbrMb-2NaIAXqYjo9Isgw')
