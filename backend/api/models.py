@@ -7,6 +7,8 @@ class CustomUser(AbstractUser):
     xp = models.IntegerField(default=0)
     level = models.CharField(max_length=50, default='Boshlovchi')
     is_verified = models.BooleanField(default=False)
+    region = models.CharField(max_length=100, null=True, blank=True)
+    is_onboarded = models.BooleanField(default=False)
 
     def __str__(self):
         return self.username or str(self.telegram_id)

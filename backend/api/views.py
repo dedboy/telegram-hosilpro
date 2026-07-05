@@ -196,14 +196,33 @@ class ProfileView(APIView):
             "phone_number": user.phone_number,
             "xp": user.xp,
             "level": user.level,
-            "is_verified": user.is_verified
+            "is_verified": user.is_verified,
+            "region": user.region,
+            "is_onboarded": user.is_onboarded
         })
 
     def post(self, request):
         user = request.user
+        
+        # Update phone number if provided
         phone = request.data.get('phone_number')
-        if phone:
+        if phone is not None:
             user.phone_number = phone
-            user.save()
-            return Response({"success": True, "phone_number": user.phone_number})
-        return Response({"error": "No phone number provided"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Update region if provided
+        region = request.data.get('region')
+        if region is not None:
+            user.region = region
+            
+        # Update onboarding status
+        is_onboarded = request.data.get('is_onboarded')
+        if is_onboarded is not None:
+            user.is_onboarded = is_onboarded
+            
+        user.save()
+        return Response({
+            "success": True, 
+            "phone_number": user.phone_number,
+            "region": user.region,
+            "is_onboarded": user.is_onboarded
+        })

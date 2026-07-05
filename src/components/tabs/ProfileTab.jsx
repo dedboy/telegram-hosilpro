@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { User, Phone, TrendingUp, ShieldCheck, Award, Star, Edit2, X, Clock } from 'lucide-react';
+import { User, Phone, TrendingUp, ShieldCheck, Award, Star, Edit2, X, Clock, MapPin } from 'lucide-react';
 import { fetchProfile, updateProfile } from '../../services/api';
 
 const ProfileTab = () => {
@@ -40,6 +40,7 @@ const ProfileTab = () => {
     lastName: tgUser?.last_name || '',
     username: tgUser?.username ? `@${tgUser.username}` : '',
     phone: profileData?.phone_number || 'Kiritilmagan',
+    region: profileData?.region || 'Viloyat tanlanmagan',
     xp: profileData?.xp || 0,
     level: profileData?.level || 'Boshlovchi',
     isVerified: profileData?.is_verified || false,
@@ -73,6 +74,14 @@ const ProfileTab = () => {
           >
             <Edit2 size={16} />
           </button>
+        </div>
+        <div className="h-px bg-gray-200 dark:bg-gray-700/50 mx-2"></div>
+        <div className="flex items-center p-2">
+          <MapPin className="text-tg-hint mr-4" size={20} />
+          <div>
+            <p className="text-xs text-tg-hint">Hudud</p>
+            <p className="font-medium">{userInfo.region}</p>
+          </div>
         </div>
         <div className="h-px bg-gray-200 dark:bg-gray-700/50 mx-2"></div>
         <div className="flex items-center p-2">
