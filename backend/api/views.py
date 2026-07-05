@@ -142,8 +142,30 @@ class WeatherView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        lat = 41.2995
-        lon = 69.2401
+        user = request.user
+        region = user.region or "Toshkent shahri"
+        
+        coordinates = {
+            "Andijon viloyati": (40.7821, 72.3442),
+            "Buxoro viloyati": (39.7747, 64.4286),
+            "Farg'ona viloyati": (40.3842, 71.7843),
+            "Jizzax viloyati": (40.1158, 67.8422),
+            "Xorazm viloyati": (41.55, 60.6333),
+            "Namangan viloyati": (40.9983, 71.6726),
+            "Navoiy viloyati": (40.0844, 65.3792),
+            "Qashqadaryo viloyati": (38.8606, 65.7891),
+            "Qoraqalpog'iston Respublikasi": (42.4667, 59.6167),
+            "Samarqand viloyati": (39.6542, 66.9597),
+            "Sirdaryo viloyati": (40.4939, 68.7863),
+            "Surxondaryo viloyati": (37.2214, 67.2772),
+            "Toshkent viloyati": (41.2995, 69.2401),
+            "Toshkent shahri": (41.2995, 69.2401),
+        }
+        
+        lat, lon = coordinates.get(region, (41.2995, 69.2401))
+        # Remove ' viloyati' and ' shahri' for a cleaner display name
+        city_display = region.replace(" viloyati", "").replace(" shahri", "").replace(" Respublikasi", "")
+        
         url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true"
         
         try:
@@ -155,7 +177,7 @@ class WeatherView(APIView):
                     "temperature": current.get('temperature'),
                     "windspeed": current.get('windspeed'),
                     "weathercode": current.get('weathercode'),
-                    "city": "Toshkent"
+                    "city": city_display
                 })
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
