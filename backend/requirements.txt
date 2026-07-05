@@ -6,3 +6,4 @@ django-environ
 whitenoise
 gunicorn
 Pillow>=10.0.0
+django-jazzmin

@@ -21,6 +21,7 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', '.n
 
 # Application definition
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -96,6 +97,35 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # WhiteNoise storage optimization for production
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# JAZZMIN Configuration
+JAZZMIN_SETTINGS = {
+    "site_title": "HosilPro Admin",
+    "site_header": "HosilPro",
+    "site_brand": "HosilPro MVP",
+    "welcome_sign": "HosilPro Boshqaruv Paneliga Xush Kelibsiz",
+    "copyright": "HosilPro",
+    "search_model": ["api.CustomUser", "api.AgroReport"],
+    "topmenu_links": [
+        {"name": "Bosh Sahifa",  "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"model": "api.CustomUser"},
+        {"model": "api.AgroReport"}
+    ],
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "api.CustomUser": "fas fa-user-circle",
+        "api.DigitalPlot": "fas fa-map-marked-alt",
+        "api.ActiveCrop": "fas fa-leaf",
+        "api.UserTask": "fas fa-tasks",
+        "api.AgroReport": "fas fa-exclamation-triangle",
+    },
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+}
 
 # Media files
 MEDIA_URL = '/media/'
