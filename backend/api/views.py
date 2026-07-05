@@ -1,7 +1,10 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+import json
+import urllib.request
 from .models import DigitalPlot, UserTask, AgroReport, ActiveCrop
 from .serializers import DigitalPlotSerializer, UserTaskSerializer, AgroReportSerializer, ActiveCropSerializer
 from .authentication import TelegramAuthentication
@@ -85,3 +88,26 @@ class ReportViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+class WeatherView(APIView):
+    authentication_classes = [TelegramAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        lat = 41.2995
+        lon = 69.2401
+        url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true"
+        
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req) as response:
+                data = json.loads(response.read().decode())
+                current = data.get('current_weather', {})
+                return Response({
+                    "temperature": current.get('temperature'),
+                    "windspeed": current.get('windspeed'),
+                    "weathercode": current.get('weathercode'),
+                    "city": "Toshkent"
+                })
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

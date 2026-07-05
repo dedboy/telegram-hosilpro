@@ -87,6 +87,19 @@ export const submitReport = async (data) => {
   }
 };
 
+export const fetchWeather = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/weather/`, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching weather:", error);
+    return null;
+  }
+};
+
 export const submitCrop = async (data) => {
   try {
     const response = await fetch(`${API_BASE_URL}/crops/`, {

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { fetchPlots, submitCrop } from '../../services/api';
+import { fetchPlots, submitCrop, fetchWeather } from '../../services/api';
 import { PlusCircle, Droplets, Map, Sprout, X } from 'lucide-react';
 
 const DashboardTab = () => {
   const [plotData, setPlotData] = useState(null);
+  const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [submittingCrop, setSubmittingCrop] = useState(false);
@@ -21,8 +22,15 @@ const DashboardTab = () => {
     });
   };
 
+  const loadWeather = () => {
+    fetchWeather().then((data) => {
+      if (data) setWeatherData(data);
+    });
+  };
+
   useEffect(() => {
     loadPlots();
+    loadWeather();
   }, []);
 
   const handleAddCropClick = () => {
@@ -71,6 +79,20 @@ const DashboardTab = () => {
         <h1 className="text-2xl font-bold mb-1">Raqamli Klon (Digital Twin)</h1>
         <p className="text-tg-hint text-sm">Sizning virtual ekinzoringiz</p>
       </header>
+
+      {/* Weather Widget */}
+      {weatherData && (
+        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl p-4 shadow-sm text-white flex justify-between items-center mb-6">
+          <div>
+            <p className="text-sm opacity-90">{weatherData.city} (Bugun)</p>
+            <h2 className="text-3xl font-bold">{weatherData.temperature}°C</h2>
+          </div>
+          <div className="text-right">
+            <p className="text-sm opacity-90">Shamol</p>
+            <p className="font-semibold">{weatherData.windspeed} km/h</p>
+          </div>
+        </div>
+      )}
 
       {/* Plot Stats Card */}
       <div className="bg-tg-secondary-bg rounded-2xl p-4 shadow-sm border border-gray-100/10">
