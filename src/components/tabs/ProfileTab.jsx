@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { User, Phone, TrendingUp, ShieldCheck, Award, Star } from 'lucide-react';
-import { fetchProfile } from '../../services/api';
+import { User, Phone, TrendingUp, ShieldCheck, Award, Star, Edit2, X } from 'lucide-react';
+import { fetchProfile, updateProfile } from '../../services/api';
 
 const ProfileTab = () => {
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
   const [profileData, setProfileData] = useState(null);
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [newPhone, setNewPhone] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchProfile().then(data => {
@@ -12,11 +15,31 @@ const ProfileTab = () => {
     });
   }, []);
   
+  const handleSavePhone = async (e) => {
+    e.preventDefault();
+    if (!newPhone) return;
+    setSaving(true);
+    try {
+      const res = await updateProfile({ phone_number: newPhone });
+      if (res && res.success) {
+        setProfileData({ ...profileData, phone_number: res.phone_number });
+        setIsEditingPhone(false);
+        if (window.Telegram?.WebApp) {
+          window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+        }
+      }
+    } catch (err) {
+      alert("Xatolik yuz berdi");
+    } finally {
+      setSaving(false);
+    }
+  };
+  
   const userInfo = {
     name: tgUser?.first_name || 'Fermer (Test)',
     lastName: tgUser?.last_name || '',
     username: tgUser?.username ? `@${tgUser.username}` : '',
-    phone: '+998 90 123 45 67',
+    phone: profileData?.phone_number || 'Kiritilmagan',
     xp: profileData?.xp || 0,
     level: profileData?.level || 'Boshlovchi',
   };
@@ -32,12 +55,23 @@ const ProfileTab = () => {
       </header>
 
       <div className="bg-tg-secondary-bg rounded-2xl p-4 border border-gray-100/10 space-y-4">
-        <div className="flex items-center p-2">
-          <Phone className="text-tg-hint mr-4" size={20} />
-          <div>
-            <p className="text-xs text-tg-hint">Telefon raqam</p>
-            <p className="font-medium">{userInfo.phone}</p>
+        <div className="flex items-center justify-between p-2">
+          <div className="flex items-center">
+            <Phone className="text-tg-hint mr-4" size={20} />
+            <div>
+              <p className="text-xs text-tg-hint">Telefon raqam</p>
+              <p className="font-medium">{userInfo.phone}</p>
+            </div>
           </div>
+          <button 
+            onClick={() => {
+              setNewPhone(profileData?.phone_number || '+998 ');
+              setIsEditingPhone(true);
+            }} 
+            className="p-2 bg-tg-bg rounded-full text-emerald-500 active:scale-95"
+          >
+            <Edit2 size={16} />
+          </button>
         </div>
         <div className="h-px bg-gray-200 dark:bg-gray-700/50 mx-2"></div>
         <div className="flex items-center p-2">
@@ -68,6 +102,41 @@ const ProfileTab = () => {
         <p className="text-xs text-tg-hint mb-1">Klon uy - AgroTech Digital Twin</p>
         <p className="text-[10px] text-tg-hint/70">v1.0.0</p>
       </div>
+
+      {/* Edit Phone Modal */}
+      {isEditingPhone && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm animate-fade-in p-4 pb-8">
+          <div className="bg-tg-secondary-bg w-full max-w-md rounded-3xl p-6 shadow-2xl relative animate-slide-up">
+            <button 
+              onClick={() => setIsEditingPhone(false)}
+              className="absolute top-4 right-4 p-2 bg-tg-bg rounded-full text-tg-hint active:scale-95"
+            >
+              <X size={20} />
+            </button>
+            <h2 className="text-xl font-bold mb-6">Profilni tahrirlash</h2>
+            <form onSubmit={handleSavePhone} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1 text-tg-hint">Telefon raqam</label>
+                <input 
+                  type="text" 
+                  value={newPhone}
+                  onChange={(e) => setNewPhone(e.target.value)}
+                  className="w-full bg-tg-bg border-none rounded-xl p-3 focus:ring-2 focus:ring-tg-button outline-none"
+                  required 
+                  placeholder="+998 90 123 45 67"
+                />
+              </div>
+              <button 
+                type="submit"
+                disabled={saving}
+                className="w-full bg-tg-button text-tg-button-text rounded-xl py-3.5 font-bold mt-4 active:scale-[0.98] transition-transform"
+              >
+                {saving ? 'Saqlanmoqda...' : 'Saqlash'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

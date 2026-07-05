@@ -193,6 +193,16 @@ class ProfileView(APIView):
         return Response({
             "username": user.username,
             "telegram_id": user.telegram_id,
+            "phone_number": user.phone_number,
             "xp": user.xp,
             "level": user.level
         })
+
+    def post(self, request):
+        user = request.user
+        phone = request.data.get('phone_number')
+        if phone:
+            user.phone_number = phone
+            user.save()
+            return Response({"success": True, "phone_number": user.phone_number})
+        return Response({"error": "No phone number provided"}, status=status.HTTP_400_BAD_REQUEST)

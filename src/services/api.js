@@ -148,3 +148,17 @@ export const fetchProfile = async () => {
     return null;
   }
 };
+
+export const updateProfile = async (data) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/profile/`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    throw error;
+  }
+};
