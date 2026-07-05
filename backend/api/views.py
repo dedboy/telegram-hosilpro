@@ -45,6 +45,23 @@ class ActiveCropViewSet(viewsets.ModelViewSet):
             # Create fallback plot if it doesn't exist for some reason
             plot = DigitalPlot.objects.create(user=self.request.user, size="6 Sotix", soil_type="Noma'lum")
         crop = serializer.save(plot=plot)
+        
+        # Create initial tasks for the new crop
+        UserTask.objects.create(
+            user=self.request.user,
+            crop=crop,
+            title=f"{crop.name} uchun yerni o'g'itlash va tayyorlash",
+            description="Yangi ekin uchun yerni yumshatish va dastlabki o'g'itlarni berish zarur.",
+            status="Pending"
+        )
+        UserTask.objects.create(
+            user=self.request.user,
+            crop=crop,
+            title=f"{crop.name}ni dastlabki sug'orish",
+            description="Ekilgandan so'ng darhol sug'orishni amalga oshiring.",
+            status="Pending"
+        )
+
         send_telegram_message(
             self.request.user.telegram_id, 
             f"🌱 <b>Yangi ekin qo'shildi!</b>\n\nMaydoningizga yangi <b>{crop.name}</b> ekini muvaffaqiyatli qo'shildi. Endi sizga u haqida kundalik maslahatlar berib boraman."
