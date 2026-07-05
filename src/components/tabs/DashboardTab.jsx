@@ -15,6 +15,9 @@ const DashboardTab = () => {
     fetchPlots().then((data) => {
       setPlotData(data);
       setLoading(false);
+    }).catch((err) => {
+      console.error(err);
+      setLoading(false);
     });
   };
 
@@ -51,6 +54,15 @@ const DashboardTab = () => {
 
   if (loading && !plotData) {
     return <div className="p-4 flex justify-center items-center h-full text-tg-hint">Yuklanmoqda...</div>;
+  }
+
+  if (!plotData) {
+    return (
+      <div className="p-8 flex flex-col justify-center items-center text-center h-full">
+        <p className="text-red-500 font-bold mb-2">Ma'lumot yuklanmadi</p>
+        <p className="text-sm text-tg-hint">Iltimos, ilovaga Telegram bot orqali kiring. Oddiy brauzerda ishlamaydi.</p>
+      </div>
+    );
   }
 
   return (
