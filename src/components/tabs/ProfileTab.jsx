@@ -5,9 +5,17 @@ import { fetchProfile, updateProfile } from '../../services/api';
 const ProfileTab = () => {
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
   const [profileData, setProfileData] = useState(null);
-  const [isEditingPhone, setIsEditingPhone] = useState(false);
-  const [newPhone, setNewPhone] = useState('');
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editPhone, setEditPhone] = useState('');
+  const [editRegion, setEditRegion] = useState('');
   const [saving, setSaving] = useState(false);
+
+  const REGIONS = [
+    "Andijon viloyati", "Buxoro viloyati", "Farg'ona viloyati", "Jizzax viloyati",
+    "Xorazm viloyati", "Namangan viloyati", "Navoiy viloyati", "Qashqadaryo viloyati",
+    "Qoraqalpog'iston Respublikasi", "Samarqand viloyati", "Sirdaryo viloyati",
+    "Surxondaryo viloyati", "Toshkent viloyati", "Toshkent shahri"
+  ];
 
   useEffect(() => {
     fetchProfile().then(data => {
@@ -15,15 +23,15 @@ const ProfileTab = () => {
     });
   }, []);
   
-  const handleSavePhone = async (e) => {
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
-    if (!newPhone) return;
+    if (!editPhone || !editRegion) return;
     setSaving(true);
     try {
-      const res = await updateProfile({ phone_number: newPhone });
+      const res = await updateProfile({ phone_number: editPhone, region: editRegion });
       if (res && res.success) {
-        setProfileData({ ...profileData, phone_number: res.phone_number });
-        setIsEditingPhone(false);
+        setProfileData({ ...profileData, phone_number: res.phone_number, region: res.region });
+        setIsEditingProfile(false);
         if (window.Telegram?.WebApp) {
           window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
         }
@@ -67,8 +75,9 @@ const ProfileTab = () => {
           </div>
           <button 
             onClick={() => {
-              setNewPhone(profileData?.phone_number || '+998 ');
-              setIsEditingPhone(true);
+              setEditPhone(profileData?.phone_number || '+998 ');
+              setEditRegion(profileData?.region || '');
+              setIsEditingProfile(true);
             }} 
             className="p-2 bg-tg-bg rounded-full text-emerald-500 active:scale-95"
           >
@@ -119,28 +128,42 @@ const ProfileTab = () => {
         <p className="text-[10px] text-tg-hint/70">v1.0.0</p>
       </div>
 
-      {/* Edit Phone Modal */}
-      {isEditingPhone && (
+      {/* Edit Profile Modal */}
+      {isEditingProfile && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm animate-fade-in p-4 pb-8">
           <div className="bg-tg-secondary-bg w-full max-w-md rounded-3xl p-6 shadow-2xl relative animate-slide-up">
             <button 
-              onClick={() => setIsEditingPhone(false)}
+              onClick={() => setIsEditingProfile(false)}
               className="absolute top-4 right-4 p-2 bg-tg-bg rounded-full text-tg-hint active:scale-95"
             >
               <X size={20} />
             </button>
             <h2 className="text-xl font-bold mb-6">Profilni tahrirlash</h2>
-            <form onSubmit={handleSavePhone} className="space-y-4">
+            <form onSubmit={handleSaveProfile} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1 text-tg-hint">Telefon raqam</label>
                 <input 
                   type="text" 
-                  value={newPhone}
-                  onChange={(e) => setNewPhone(e.target.value)}
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
                   className="w-full bg-tg-bg border-none rounded-xl p-3 focus:ring-2 focus:ring-tg-button outline-none"
                   required 
                   placeholder="+998 90 123 45 67"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-tg-hint">Hududingiz</label>
+                <select 
+                  value={editRegion}
+                  onChange={(e) => setEditRegion(e.target.value)}
+                  className="w-full bg-tg-bg border-none rounded-xl p-3 focus:ring-2 focus:ring-tg-button outline-none appearance-none"
+                  required
+                >
+                  <option value="" disabled>Viloyatni tanlang</option>
+                  {REGIONS.map(r => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
               </div>
               <button 
                 type="submit"

@@ -138,9 +138,10 @@ export const fetchAIAnalysis = async (cropType, issueDescription) => {
 
 export const fetchProfile = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/profile/`, {
+    const response = await fetch(`${API_BASE_URL}/profile/?t=${Date.now()}`, {
       method: 'GET',
       headers: getHeaders(),
+      cache: 'no-store'
     });
     return await response.json();
   } catch (error) {
