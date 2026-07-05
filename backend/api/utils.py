@@ -1,53 +1,28 @@
-import hashlib
-import hmac
+import urllib.request
 import urllib.parse
 import json
+from django.conf import settings
 
-def verify_telegram_data(init_data_str: str, bot_token: str):
+def send_telegram_message(chat_id, text):
     """
-    Verifies Telegram WebApp initData string using HMAC-SHA256.
-    Returns parsed user dict if valid, else None.
+    Sends a message to a Telegram user via the bot.
     """
-    if not init_data_str:
-        return None
-
+    token = settings.TELEGRAM_BOT_TOKEN
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    
+    data = {
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": "HTML"
+    }
+    
+    # URL encode and send
+    data_encoded = urllib.parse.urlencode(data).encode('utf-8')
+    req = urllib.request.Request(url, data=data_encoded)
+    
     try:
-        # Parse the URL-encoded query string
-        parsed_data = urllib.parse.parse_qsl(init_data_str)
-        
-        # Convert to dictionary and extract 'hash'
-        data_dict = dict(parsed_data)
-        received_hash = data_dict.pop('hash', None)
-        
-        if not received_hash:
-            return None
-
-        # Sort the remaining key-value pairs alphabetically by key
-        sorted_items = sorted(data_dict.items(), key=lambda x: x[0])
-        
-        # Create the data check string
-        data_check_string = '\n'.join([f"{k}={v}" for k, v in sorted_items])
-        
-        # Compute the secret key using the bot token
-        secret_key = hmac.new(
-            key=b'WebAppData', 
-            msg=bot_token.encode('utf-8'), 
-            digestmod=hashlib.sha256
-        ).digest()
-        
-        # Compute the final hash
-        calculated_hash = hmac.new(
-            key=secret_key, 
-            msg=data_check_string.encode('utf-8'), 
-            digestmod=hashlib.sha256
-        ).hexdigest()
-        
-        if hmac.compare_digest(calculated_hash, received_hash):
-            user_data_json = data_dict.get('user', '{}')
-            user_data = json.loads(user_data_json)
-            return user_data
-            
-        return None
+        with urllib.request.urlopen(req) as response:
+            return json.loads(response.read().decode())
     except Exception as e:
-        print(f"Telegram validation error: {e}")
+        print(f"Failed to send Telegram message: {e}")
         return None

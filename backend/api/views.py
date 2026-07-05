@@ -8,6 +8,7 @@ import urllib.request
 from .models import DigitalPlot, UserTask, AgroReport, ActiveCrop
 from .serializers import DigitalPlotSerializer, UserTaskSerializer, AgroReportSerializer, ActiveCropSerializer
 from .authentication import TelegramAuthentication
+from .utils import send_telegram_message
 
 class PlotViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = DigitalPlotSerializer
@@ -41,7 +42,11 @@ class ActiveCropViewSet(viewsets.ModelViewSet):
         if not plot:
             # Create fallback plot if it doesn't exist for some reason
             plot = DigitalPlot.objects.create(user=self.request.user, size="6 Sotix", soil_type="Noma'lum")
-        serializer.save(plot=plot)
+        crop = serializer.save(plot=plot)
+        send_telegram_message(
+            self.request.user.telegram_id, 
+            f"🌱 <b>Yangi ekin qo'shildi!</b>\n\nMaydoningizga yangi <b>{crop.name}</b> ekini muvaffaqiyatli qo'shildi. Endi sizga u haqida kundalik maslahatlar berib boraman."
+        )
 
 class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = UserTaskSerializer
@@ -87,7 +92,11 @@ class ReportViewSet(viewsets.ModelViewSet):
         return AgroReport.objects.filter(user=self.request.user).order_by('-created_at')
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        report = serializer.save(user=self.request.user)
+        send_telegram_message(
+            self.request.user.telegram_id,
+            f"🚨 <b>SOS/Muammo yuborildi!</b>\n\nSizning <b>{report.crop_type}</b> dagi muammongiz (<i>{report.issue_description}</i>) mutaxassislarga (va AI Agronomga) yuborildi. Tez orada javob qaytaramiz!"
+        )
 
 class WeatherView(APIView):
     authentication_classes = [TelegramAuthentication]
