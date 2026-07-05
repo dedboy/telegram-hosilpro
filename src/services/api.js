@@ -118,3 +118,20 @@ export const submitCrop = async (data) => {
     throw error;
   }
 };
+
+export const fetchAIAnalysis = async (cropType, issueDescription) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/ai-analyze/`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({
+        crop_type: cropType,
+        issue_description: issueDescription
+      })
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching AI analysis:", error);
+    return null;
+  }
+};

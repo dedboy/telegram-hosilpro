@@ -5,6 +5,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 import json
 import urllib.request
+import google.generativeai as genai
+from django.conf import settings
 from .models import DigitalPlot, UserTask, AgroReport, ActiveCrop
 from .serializers import DigitalPlotSerializer, UserTaskSerializer, AgroReportSerializer, ActiveCropSerializer
 from .authentication import TelegramAuthentication
@@ -118,5 +120,27 @@ class WeatherView(APIView):
                     "weathercode": current.get('weathercode'),
                     "city": "Toshkent"
                 })
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class AIAnalyzeView(APIView):
+    authentication_classes = [TelegramAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        crop_type = request.data.get('crop_type', 'Noma\'lum ekin')
+        issue_description = request.data.get('issue_description', '')
+        
+        if not issue_description:
+            return Response({"error": "No description provided"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            genai.configure(api_key=settings.GEMINI_API_KEY)
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            
+            prompt = f"Sen tajribali agronom va qishloq xo'jaligi mutaxassisisan. Dehqon murojaat qilyapti. Ekin turi: {crop_type}. Muammo: {issue_description}. Qisqa, lo'nda, o'zbek tilida 2-3 gap bilan aniq yechim va maslahat ber."
+            
+            response = model.generate_content(prompt)
+            return Response({"analysis": response.text})
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

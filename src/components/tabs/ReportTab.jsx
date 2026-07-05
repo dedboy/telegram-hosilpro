@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { fetchReports, submitReport } from '../../services/api';
-import { AlertTriangle, Send, History } from 'lucide-react';
+import { fetchReports, submitReport, fetchAIAnalysis } from '../../services/api';
+import { AlertTriangle, Send, History, Sparkles } from 'lucide-react';
 
 const ReportTab = () => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResponse, setAiResponse] = useState(null);
   
   const [formData, setFormData] = useState({
     crop: '',
@@ -24,17 +26,32 @@ const ReportTab = () => {
     if (!formData.crop || !formData.description) return;
     
     setSubmitting(true);
+    setAiLoading(true);
+    setAiResponse(null);
+    
+    const submittedCrop = formData.crop;
+    const submittedDesc = formData.description;
+    
     submitReport(formData).then(() => {
       setSubmitting(false);
       setFormData({ crop: '', description: '' });
+      
       if (window.Telegram?.WebApp) {
-        window.Telegram.WebApp.showAlert("Muammo muvaffaqiyatli yuborildi. Tez orada mutaxassislarimiz bog'lanishadi!");
-      } else {
-        alert("Muammo yuborildi!");
+        window.Telegram.WebApp.showAlert("Muammo yuborildi! AI Agronom tahlili tayyorlanmoqda...");
       }
       
-      // Refresh reports mock
-      setReports([{ id: Date.now(), crop: formData.crop, description: formData.description, status: 'Kutish jarayonida' }, ...reports]);
+      // Refresh reports
+      setReports([{ id: Date.now(), crop_type: submittedCrop, issue_description: submittedDesc, created_at: new Date().toISOString() }, ...reports]);
+      
+      // Fetch AI Analysis
+      fetchAIAnalysis(submittedCrop, submittedDesc).then((res) => {
+        setAiLoading(false);
+        if (res && res.analysis) {
+          setAiResponse(res.analysis);
+        } else {
+          setAiResponse("Kechirasiz, Sun'iy Intellekt tarmog'ida xatolik yuz berdi.");
+        }
+      });
     });
   };
 
@@ -106,8 +123,29 @@ const ReportTab = () => {
           </button>
         </form>
       </div>
+      
+      {/* AI Response Box */}
+      {(aiLoading || aiResponse) && (
+        <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-2xl p-5 mb-6">
+          <h2 className="text-lg font-semibold mb-3 flex items-center text-indigo-500">
+            <Sparkles size={20} className="mr-2" />
+            AI Agronom Xulosasi
+          </h2>
+          {aiLoading ? (
+            <div className="animate-pulse space-y-2">
+              <div className="h-4 bg-indigo-500/20 rounded w-3/4"></div>
+              <div className="h-4 bg-indigo-500/20 rounded w-full"></div>
+              <div className="h-4 bg-indigo-500/20 rounded w-5/6"></div>
+            </div>
+          ) : (
+            <div className="text-sm leading-relaxed whitespace-pre-wrap">
+              {aiResponse}
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* History */}
+      {/* History List */}
       <div>
         <h2 className="text-lg font-bold mb-3 flex items-center">
           <History size={18} className="mr-2" />

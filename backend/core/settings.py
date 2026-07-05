@@ -140,6 +140,9 @@ CORS_ALLOW_ALL_ORIGINS = True
 # Telegram Authentication
 TELEGRAM_BOT_TOKEN = env('TELEGRAM_BOT_TOKEN', default='8761808924:AAGrTornZrY2dRAbrMb-2NaIAXqYjo9Isgw')
 
+# Gemini AI
+GEMINI_API_KEY = env('GEMINI_API_KEY', default='')
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'api.authentication.TelegramAuthentication',
