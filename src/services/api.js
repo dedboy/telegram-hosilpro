@@ -135,3 +135,16 @@ export const fetchAIAnalysis = async (cropType, issueDescription) => {
     return null;
   }
 };
+
+export const fetchProfile = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/profile/`, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    return null;
+  }
+};

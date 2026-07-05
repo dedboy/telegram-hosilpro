@@ -1,6 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { fetchPlots, submitCrop, fetchWeather } from '../../services/api';
 import { PlusCircle, Droplets, Map, Sprout, X } from 'lucide-react';
+const COMMON_CROPS = [
+  { id: 'pomidor', name: 'Pomidor', icon: '🍅' },
+  { id: 'bodring', name: 'Bodring', icon: '🥒' },
+  { id: 'goza', name: 'G\'o\'za', icon: '🌿' },
+  { id: 'bugdoy', name: 'Bug\'doy', icon: '🌾' },
+  { id: 'olma', name: 'Olma', icon: '🍎' },
+  { id: 'kartoshka', name: 'Kartoshka', icon: '🥔' },
+];
+
+const getWeatherStyle = (code) => {
+  if (code === undefined || code === null) return { bg: 'from-blue-500 to-cyan-500', icon: '🌤️' };
+  if (code === 0) return { bg: 'from-orange-400 to-yellow-400', icon: '☀️' };
+  if (code <= 3) return { bg: 'from-blue-400 to-cyan-400', icon: '⛅' };
+  if (code <= 48) return { bg: 'from-gray-400 to-gray-500', icon: '🌫️' };
+  if (code <= 67 || (code >= 80 && code <= 82)) return { bg: 'from-indigo-500 to-blue-600', icon: '🌧️' };
+  if (code <= 77 || (code >= 85 && code <= 86)) return { bg: 'from-blue-200 to-gray-300', icon: '❄️' };
+  if (code >= 95) return { bg: 'from-purple-600 to-gray-800', icon: '⛈️' };
+  return { bg: 'from-blue-500 to-cyan-500', icon: '🌤️' };
+};
 
 const DashboardTab = () => {
   const [plotData, setPlotData] = useState(null);
@@ -82,14 +101,20 @@ const DashboardTab = () => {
 
       {/* Weather Widget */}
       {weatherData && (
-        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl p-4 shadow-sm text-white flex justify-between items-center mb-6">
-          <div>
-            <p className="text-sm opacity-90">{weatherData.city} (Bugun)</p>
-            <h2 className="text-3xl font-bold">{weatherData.temperature}°C</h2>
+        <div className={`bg-gradient-to-r ${getWeatherStyle(weatherData.weathercode).bg} rounded-2xl p-5 shadow-sm text-white flex justify-between items-center mb-6 relative overflow-hidden`}>
+          <div className="absolute -right-4 -top-4 opacity-20 text-8xl">
+            {getWeatherStyle(weatherData.weathercode).icon}
           </div>
-          <div className="text-right">
-            <p className="text-sm opacity-90">Shamol</p>
-            <p className="font-semibold">{weatherData.windspeed} km/h</p>
+          <div className="relative z-10">
+            <p className="text-sm opacity-90 flex items-center">
+              <span className="text-xl mr-1">{getWeatherStyle(weatherData.weathercode).icon}</span>
+              {weatherData.city} (Bugun)
+            </p>
+            <h2 className="text-4xl font-bold mt-1">{weatherData.temperature}°C</h2>
+          </div>
+          <div className="text-right relative z-10 bg-black/20 p-3 rounded-xl backdrop-blur-sm">
+            <p className="text-xs opacity-90 mb-1">Shamol tezligi</p>
+            <p className="font-semibold text-lg">{weatherData.windspeed} <span className="text-sm font-normal">km/s</span></p>
           </div>
         </div>
       )}
@@ -185,14 +210,26 @@ const DashboardTab = () => {
             <h2 className="text-xl font-bold mb-6">Yangi Ekin Qo'shish</h2>
             <form onSubmit={submitNewCrop} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1 text-tg-hint">Ekin turi (Masalan: Pomidor)</label>
+                <label className="block text-sm font-medium mb-3 text-tg-hint">Ekin turini tanlang</label>
+                <div className="grid grid-cols-3 gap-3 mb-3">
+                  {COMMON_CROPS.map(c => (
+                    <div 
+                      key={c.id}
+                      onClick={() => setNewCropName(c.name)}
+                      className={`flex flex-col items-center justify-center p-3 rounded-xl cursor-pointer border-2 transition-all active:scale-95 ${newCropName === c.name ? 'border-tg-button bg-tg-button/10' : 'border-transparent bg-tg-bg'}`}
+                    >
+                      <span className="text-3xl mb-1">{c.icon}</span>
+                      <span className="text-xs font-medium text-center">{c.name}</span>
+                    </div>
+                  ))}
+                </div>
                 <input 
                   type="text" 
                   value={newCropName}
                   onChange={(e) => setNewCropName(e.target.value)}
                   className="w-full bg-tg-bg border-none rounded-xl p-3 focus:ring-2 focus:ring-tg-button outline-none"
                   required 
-                  placeholder="Ekin nomini kiriting"
+                  placeholder="Yoki boshqa ekin nomini yozing..."
                 />
               </div>
               <div>

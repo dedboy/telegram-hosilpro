@@ -1,15 +1,24 @@
-import React from 'react';
-import { User, Phone, TrendingUp, ShieldCheck, Award } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { User, Phone, TrendingUp, ShieldCheck, Award, Star } from 'lucide-react';
+import { fetchProfile } from '../../services/api';
 
 const ProfileTab = () => {
-  // Use Telegram initDataUnsafe if available, else fallback
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  const [profileData, setProfileData] = useState(null);
+
+  useEffect(() => {
+    fetchProfile().then(data => {
+      if (data) setProfileData(data);
+    });
+  }, []);
   
   const userInfo = {
     name: tgUser?.first_name || 'Fermer (Test)',
     lastName: tgUser?.last_name || '',
     username: tgUser?.username ? `@${tgUser.username}` : '',
-    phone: '+998 90 123 45 67', // Telegram API doesn't expose phone by default unless requested via bot contact sharing
+    phone: '+998 90 123 45 67',
+    xp: profileData?.xp || 0,
+    level: profileData?.level || 'Boshlovchi',
   };
 
   return (
@@ -41,15 +50,17 @@ const ProfileTab = () => {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-4 text-white shadow-md">
+        <div className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl p-4 text-white shadow-md relative overflow-hidden">
+          <Star size={60} className="absolute -right-4 -bottom-4 opacity-20" />
           <Award size={24} className="mb-2 opacity-80" />
-          <p className="text-emerald-100 text-xs mb-1">Hosil samaradorligi</p>
-          <p className="text-2xl font-bold">92%</p>
+          <p className="text-yellow-100 text-xs mb-1">Tajriba bali (XP)</p>
+          <p className="text-2xl font-bold">{userInfo.xp} <span className="text-sm font-normal">XP</span></p>
         </div>
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 text-white shadow-md">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 text-white shadow-md relative overflow-hidden">
+          <ShieldCheck size={60} className="absolute -right-4 -bottom-4 opacity-20" />
           <TrendingUp size={24} className="mb-2 opacity-80" />
-          <p className="text-blue-100 text-xs mb-1">Joriy mavsum</p>
-          <p className="text-2xl font-bold">A'lo</p>
+          <p className="text-blue-100 text-xs mb-1">Daraja (Level)</p>
+          <p className="text-xl font-bold">{userInfo.level}</p>
         </div>
       </div>
 

@@ -84,16 +84,26 @@ class TaskViewSet(viewsets.ModelViewSet):
         task.status = 'Completed'
         task.save()
         
+        # Award XP
+        user = request.user
+        user.xp += 50
+        # Simple level up logic
+        if user.xp >= 500:
+            user.level = 'Agro-Master'
+        elif user.xp >= 150:
+            user.level = 'Tajribali Dehqon'
+        user.save()
+
         try:
             from .utils import send_telegram_message
             chat_id = self.request.user.telegram_id
             if chat_id:
-                text = f"✅ <b>Vazifa Bajarildi!</b>\n\nSiz <i>{task.title}</i> vazifasini muvaffaqiyatli yakunladingiz! Hosilingizga baraka!"
+                text = f"✅ <b>Vazifa Bajarildi!</b>\n\nSiz <i>{task.title}</i> vazifasini muvaffaqiyatli yakunladingiz! Hosilingizga baraka!\n🏆 Sizga <b>+50 XP</b> berildi!"
                 send_telegram_message(chat_id, text)
         except Exception as e:
             pass
 
-        return Response({'success': True, 'message': 'Bajarildi!'})
+        return Response({'success': True, 'message': 'Bajarildi!', 'xp': user.xp, 'level': user.level})
 
 class ReportViewSet(viewsets.ModelViewSet):
     serializer_class = AgroReportSerializer
@@ -156,3 +166,16 @@ class AIAnalyzeView(APIView):
             return Response({"analysis": response.text})
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ProfileView(APIView):
+    authentication_classes = [TelegramAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        return Response({
+            "username": user.username,
+            "telegram_id": user.telegram_id,
+            "xp": user.xp,
+            "level": user.level
+        })

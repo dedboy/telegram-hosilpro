@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchTasks, submitTaskCompletion } from '../../services/api';
 import { CheckCircle, Clock, Camera } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 const TasksTab = () => {
   const [tasks, setTasks] = useState([]);
@@ -31,11 +32,23 @@ const TasksTab = () => {
 
   const processCompletion = (taskId) => {
     setSubmitting(taskId);
-    submitTaskCompletion(taskId, null).then(() => {
+    submitTaskCompletion(taskId, null).then((res) => {
       setTasks(tasks.map(t => t.id === taskId ? { ...t, completed: true } : t));
       setSubmitting(null);
+      
+      // Show confetti!
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#10B981', '#3B82F6', '#F59E0B']
+      });
+
       if (window.Telegram?.WebApp) {
         window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+        if (res && res.xp) {
+          window.Telegram.WebApp.showAlert(`Tabriklaymiz! +50 XP oldingiz.\nHozirgi darajangiz: ${res.level}`);
+        }
       }
     });
   };
