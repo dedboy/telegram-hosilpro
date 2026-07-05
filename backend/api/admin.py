@@ -14,14 +14,14 @@ class DigitalPlotAdmin(admin.ModelAdmin):
 
 @admin.register(ActiveCrop)
 class ActiveCropAdmin(admin.ModelAdmin):
-    list_display = ('plot', 'name', 'area', 'stage', 'progress', 'planted_date')
-    list_filter = ('stage', 'planted_date')
+    list_display = ('plot', 'name', 'area', 'stage_description', 'progress_percentage')
+    list_filter = ('stage_description',)
     search_fields = ('name', 'plot__user__username')
 
 @admin.register(UserTask)
 class UserTaskAdmin(admin.ModelAdmin):
-    list_display = ('user', 'title', 'status', 'due_date', 'created_at')
-    list_filter = ('status', 'due_date')
+    list_display = ('user', 'title', 'status', 'created_at')
+    list_filter = ('status', 'created_at')
     search_fields = ('title', 'user__username')
 
 @admin.register(AgroReport)
