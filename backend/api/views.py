@@ -83,6 +83,16 @@ class TaskViewSet(viewsets.ModelViewSet):
         task = self.get_object()
         task.status = 'Completed'
         task.save()
+        
+        try:
+            from .utils import send_telegram_message
+            chat_id = self.request.user.telegram_id
+            if chat_id:
+                text = f"✅ <b>Vazifa Bajarildi!</b>\n\nSiz <i>{task.title}</i> vazifasini muvaffaqiyatli yakunladingiz! Hosilingizga baraka!"
+                send_telegram_message(chat_id, text)
+        except Exception as e:
+            pass
+
         return Response({'success': True, 'message': 'Bajarildi!'})
 
 class ReportViewSet(viewsets.ModelViewSet):
@@ -140,7 +150,7 @@ class AIAnalyzeView(APIView):
             prompt = f"Sen tajribali agronom va qishloq xo'jaligi mutaxassisisan. Dehqon murojaat qilyapti. Ekin turi: {crop_type}. Muammo: {issue_description}. Qisqa, lo'nda, o'zbek tilida 2-3 gap bilan aniq yechim va maslahat ber."
             
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemini-1.5-flash',
                 contents=prompt,
             )
             return Response({"analysis": response.text})
